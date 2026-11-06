@@ -12,11 +12,7 @@
 
 **Thay đổi so với notebook nguồn:** Không
 
-> **Cách dùng mẫu này:** copy/điền trên máy, lưu thành `REPORT.md`, rồi **upload** vào panel Files
-> của Colab (notebook không tự tạo file này). Ô cuối Colab sẽ đóng ZIP cùng `day1_lab_outputs/`.
-> Giải nén và đưa vào `report/` trên GitHub, rồi nộp **link repo** trên LMS.
-> Không ghi họ tên, MSSV, email, số điện thoại hoặc dữ liệu cá nhân khác vào báo cáo/output;
-> họ tên/MSSV chỉ nằm trong tên repository.
+
 
 ### Từ cần nhớ (đọc nhanh trước khi viết)
 
@@ -34,15 +30,12 @@
 
 ## 1. Phân loại ảnh
 
-**Mở file:** `day1_lab_outputs/classification_predictions.json` và `visuals/classification_top5.png`.  
-Chỉ dùng ảnh `sample_id = traffic`, lấy dòng `rank = 1`.
-
 1. Chép record hạng 1: `class_id`=468 ; `class_name`=cab ; `rank`=1 ; `score`=0.510915 ; `taxonomy_name`=ImageNet-1K
 2. Record này nói về **cả bức ảnh** hay về **một vật thể riêng** trong ảnh? Vì sao bạn nghĩ vậy?
 Record này nói về **cả bức ảnh**. Vì đây là tác vụ Image Classification (phân loại ảnh), mô hình chỉ dự đoán một nhãn đại diện duy nhất cho toàn bộ khung hình kèm xác suất, hoàn toàn không có thông tin tọa độ vị trí hay bounding box của từng phương tiện riêng biệt.
 3. Danh sách tên lớp (class list) do đâu mà có: model tự nghĩ ra, hay đi kèm taxonomy/checkpoint?
 Danh sách tên lớp **đi kèm taxonomy/checkpoint** (cụ thể là tập nhãn chuẩn ImageNet-1K gồm 1000 lớp được đóng gói sẵn trong file trọng số `yolo11n-cls.pt`), mô hình không tự nghĩ ra nhãn.
-4. ì sao cần ghi cả `class_id`, `class_name` và `taxonomy_name`, không chỉ ghi mỗi tên lớp?
+4. Vì sao cần ghi cả `class_id`, `class_name` và `taxonomy_name`, không chỉ ghi mỗi tên lớp?
 Vì mỗi trường phục vụ một mục đích khác nhau:
 - `class_id`: Định danh dạng số nguyên để máy tính và pipeline xử lý thuật toán, tính toán loss/metric.
 - `class_name`: Tên lớp dạng văn bản giúp con người đọc hiểu và kiểm tra trực quan.
@@ -50,13 +43,9 @@ Vì mỗi trường phục vụ một mục đích khác nhau:
 5. Nếu trong ảnh có nhiều vật / nhiều chủ đề, guideline cần nói rõ điều gì để người gán nhãn chọn **một** lớp?
 Guideline cần quy định rõ **quy tắc ưu tiên (priority rules)**, chẳng hạn: chọn theo chủ thể chiếm diện tích lớn nhất (dominant subject), đối tượng nằm ở trọng tâm tiền cảnh, hoặc ưu tiên theo lớp mục tiêu nghiệp vụ cụ thể.
 6. Vì sao không được lấy `score` của model làm ground truth?
-Vì `score` (ở đây là 0.510915) chỉ là xác suất dự đoán thống kê của mô hình (prediction), mô hình hoàn toàn có thể đoán sai hoặc thiếu chắc chắn (như ảnh thực tế có nhiều xe buýt và ô tô con nhưng model chỉ đoán "cab" với độ tin cậy ~51%). Ground truth phải là nhãn đúng tuyệt đối do con người xác thực dựa theo guideline.
+Vì `score` (ở đây là 0.510915) chỉ là xác suất dự đoán thống kê của mô hình (prediction), mô hình hoàn toàn có thể đoán sai hoặc thiếu chắc chắn (như ảnh thực tế có nhiều xe buýt và ô tô con nhưng model chỉ đoán "cab" với độ tin cậy ~51%). Ground truth là nhãn chuẩn do con người gán dựa trên guideline và được kiểm tra chất lượng. Nhãn này cũng có thể có sai sót hoặc bất đồng giữa các annotator, vì vậy cần reviewer/QC kiểm tra.
 
 ## 2. Phát hiện vật thể
-
-**Mở file:** `day1_lab_outputs/detection_predictions.json` và `visuals/detection_predictions.png`.  
-Chỉ dùng ảnh `sample_id = kitchen`. Chọn **một** record.  
-Số lượng prediction theo ngưỡng: xem output ô so sánh `0.20` / `0.35` / `0.60` trong notebook.
 
 1. Chép một record: `class_name`= person ; `score`= 0.912625 ; `bbox_xyxy`= [385.33, 69.24, 498.92, 348.92] ; `bbox_width`= 113.58 ; `bbox_height`= 279.68
 2. Giải thích box bằng lời thường: góc trên-trái ở đâu, góc dưới-phải ở đâu, rộng/cao bao nhiêu pixel?
@@ -87,9 +76,6 @@ Lý do: Đây là tình huống có thể gặp thường xuyên trong nhiều �
 Việc bổ sung quy tắc này vào guideline giúp người gán nhãn thực hiện thống nhất, hạn chế sự khác biệt giữa các reviewer. Nếu đối tượng bị cắt quá nhiều khiến không thể xác định chính xác loại vật thể hoặc ranh giới, cần escalation lên Lab Coach để được hướng dẫn.
 
 ## 3. Phân đoạn theo từng đối tượng
-
-**Mở file:** `day1_lab_outputs/segmentation_predictions.json` và `visuals/segmentation_prediction.png`.  
-Chỉ dùng ảnh `sample_id = kitchen`. Chọn **một** record.
 
 1. Chép một record: `instance_id`= kitchen-001 ; `class_name`= person ; `score`=0.899318 ; số điểm polygon=`polygon_point_count`=348 ; 3–5 điểm đầu của `polygon_xy`= [
   [446.0, 70.0],
